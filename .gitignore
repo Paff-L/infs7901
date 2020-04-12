@@ -1,2 +1,7 @@
 *.zip
 env
+*.csv
+__pycache__
+__MACOSX
+*.db
+*.pyc

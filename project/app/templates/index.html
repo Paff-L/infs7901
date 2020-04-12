@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Stored Patients so far</h1>
+    {% for patient in patients %}
+        <ul>
+            <h3>{{ patient[1] }} {{ patient[2] }}</h3>
+            <li>{{ patient[3] }}</li>
+            <li>{{ patient[4] }}</li>
+            <li>{{ patient[5] }}</li>
+            <li>{{ patient[6] }}</li>
+            <li>{{ patient[7] }}</li>
+            <li>{{ patient[8] }}</li>
+        </ul>
+    {% endfor %}
+{% endblock %}

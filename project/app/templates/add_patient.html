@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Add Patient</h1>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.first_name.label }}<br>
+            {{ form.first_name(size=32) }}
+            {% for error in form.first_name.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.last_name.label }}<br>
+            {{ form.last_name(size=32) }}
+            {% for error in form.last_name.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.gender.label }}<br>
+            {{ form.gender }}
+            {% for error in form.gender.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.nationality.label }}<br>
+            {{ form.nationality(size=32) }}
+        </p>
+        <p>
+            {{ form.state.label }}<br>
+            {{ form.state(size=32) }}
+        </p>
+        <p>
+            {{ form.postcode.label }}<br>
+            {{ form.postcode(size=4) }}
+        </p>
+        <p>
+            {{ form.date_of_birth.label }}<br>
+            {{ form.date_of_birth }}
+            {% for error in form.date_of_birth.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.phone_number.label }}<br>
+            {{ form.phone_number(size=10) }}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}
