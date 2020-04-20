@@ -1,0 +1,9 @@
+.virus-field {
+    width: 90%;
+    display: inline;
+}
+
+.virus-button {
+    display: inline;
+    margin-left: 2px;
+}

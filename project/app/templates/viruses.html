@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h1>Viruses</h1>
+    {% for virus in viruses %}
+        <ul>
+            <h3><a href="{{ url_for('virus', virus_id=virus[0]) }}">{{ virus[1] }}</a></h3>
+        </ul>
+    {% endfor %}
+{% endblock %}

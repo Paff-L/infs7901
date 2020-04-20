@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h1>Information for Patient ID: {{ patient[0] }}</h1>
+    <ul>
+        <h3>{{ patient[1] }} {{ patient[2] }}</h3>
+        <li>{{ patient[3] }}</li>
+        <li>{{ patient[4] }}</li>
+        <li>{{ patient[5] }}</li>
+        <li>{{ patient[6] }}</li>
+        <li>{{ patient[7] }}</li>
+        <li>{{ patient[8] }}</li>
+    </ul>
+
+    <h3>The Patient has contracted the following diseases:</h3>
+    <ul>
+        {% for virus in viruses %}
+            <li><a href="{{ url_for('virus', virus_id=virus[0]) }}">{{ virus[1] }}</a></li>
+        {% endfor %}
+    </ul>
+    <p><a href="{{ url_for('edit_patient', patient_id=patient[0]) }}">Edit Patient Information</a></p>
+{% endblock %}

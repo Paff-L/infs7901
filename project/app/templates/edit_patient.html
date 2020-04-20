@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <h1>Edit Patient</h1>
+    <div class="row">
+        <div class="col-md-4">
+            <form class="form" action="" method="post" role="form">
+                {{ form.hidden_tag() }}
+                {{ wtf.form_errors(form, hiddens="only") }}
+
+                {{ wtf.form_field(form.first_name) }}
+                {{ wtf.form_field(form.last_name) }}
+                {{ wtf.form_field(form.gender) }}
+                {{ wtf.form_field(form.nationality) }}
+                {{ wtf.form_field(form.state) }}
+                {{ wtf.form_field(form.postcode) }}
+                {{ wtf.form_field(form.date_of_birth) }}
+                {{ wtf.form_field(form.phone_number) }}
+
+                {% for contracted_form in form.viruses %}
+                    {{ contracted_form.hidden_tag() }}
+                    <div class="form-group virus-form">
+                        {{ contracted_form.virus.label(class_="control-label") }}
+                        {{ contracted_form.virus(class_="form-control virus-field") }}
+                        <button type="button" class="virus-button" id="addNewField">+</button> 
+                    </div>
+                {% endfor %}
+
+                {{ wtf.form_field(form.submit) }}
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{super()}}
+
+    <script>
+    $(document).ready(function() {
+        $("#addNewField").click(function() {
+            var newInput = $("#viruses-1-virus").clone()
+            $(".virus-form").append(newInput);
+        });
+    });
+    </script>
+{% endblock %}

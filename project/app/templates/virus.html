@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h1>Information on {{ virus[1] }}</h1>
+    <p>The last recorded outbreak for this virus occured on <strong>{{ virus[2] }}</strong>.</p>
+    <p>Typical symptoms: {{ virus[3] }}.</p> 
+{% endblock %}
