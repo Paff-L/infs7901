@@ -9,9 +9,3 @@ class Patient():
         self.postcode = record[6]
         self.date_of_birth = record[7]
         self.phone_number = record[8]
-        
-        
-        
-        
-        
-        

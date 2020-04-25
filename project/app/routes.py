@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for
 from app import app, cursor, db
-from app.forms import PatientAdd, PatientEdit
-from app.models import Patient
+from app.forms import PatientAdd, PatientEdit, ContractedVirusForm
+from app.models import Patient 
 
 @app.route('/')
 @app.route('/index')
@@ -46,12 +46,24 @@ def add_patient():
 def edit_patient(patient_id):
     form = PatientEdit()
     
+    query = f"SELECT * FROM Patient WHERE PatientID = {patient_id}"
+    cursor.execute(query)
+    records = cursor.fetchall()
+    
+    query = f"SELECT V.VirusID, C.ContractDate FROM Contracted C, Virus V WHERE C.VirusID = V.VirusID AND C.PatientID = {patient_id}"
+    cursor.execute(query)
+    contracted_viruses = cursor.fetchall()
+    
     if not form.is_submitted():
-        query = f"SELECT * FROM Patient WHERE PatientID = {patient_id}"
-        cursor.execute(query)
-        records = cursor.fetchall()
         patient_info = Patient(records[0])
         form.process(obj=patient_info)
+        if contracted_viruses:
+            form.viruses.pop_entry()
+        for virus_id, contract_date in [entry for entry in contracted_viruses]:
+            virus_form = ContractedVirusForm()
+            virus_form.virus = virus_id
+            virus_form.contract_date = contract_date
+            form.viruses.append_entry(virus_form)
     else:
         form = PatientEdit()
 
@@ -67,6 +79,23 @@ def edit_patient(patient_id):
                 `PhoneNumber` = '{form.phone_number.data}' WHERE PatientID = {patient_id}"
         cursor.execute(query)
         db.commit()
+        
+        for entry in form.viruses.data:
+            virus_id = int(entry.get('virus'))
+            contract_date = entry.get('contract_date')
+            if virus_id not in [entry[0] for entry in contracted_viruses]:
+                query = f"INSERT INTO `Contracted` (`PatientID`, `VirusID`, `ContractDate`) VALUES \
+                        (%s, %s, %s)"
+                data_list = [patient_id, virus_id, contract_date]
+                cursor.execute(query, data_list)
+                db.commit()
+            else:
+                if contract_date != [entry[1] for entry in contracted_viruses if entry[0] == virus_id][0]:
+                    query = f"Update `Contracted` SET `ContractDate` = '{contract_date}' \
+                            WHERE PatientID = {patient_id} AND VirusID = {virus_id}"
+                    cursor.execute(query)
+                    db.commit()
+                
         return redirect(url_for('patient', patient_id=patient_id))
     return render_template('edit_patient.html', title='Edit Patient Information', form=form)
 

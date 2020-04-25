@@ -1,5 +1,9 @@
+.virus-label {
+    display: block;
+}
+
 .virus-field {
-    width: 90%;
+    width: 40%;
     display: inline;
 }
 

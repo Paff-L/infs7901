@@ -18,16 +18,20 @@
                 {{ wtf.form_field(form.date_of_birth) }}
                 {{ wtf.form_field(form.phone_number) }}
 
-                {% for contracted_form in form.viruses %}
-                    {{ contracted_form.hidden_tag() }}
-                    <div class="form-group virus-form">
-                        {{ contracted_form.virus.label(class_="control-label") }}
+                <div class="form-group virus-form">
+                    {{ form.viruses.label(class_="control-label, virus-label") }}
+                    {% for contracted_form in form.viruses %}
+                        {{ contracted_form.hidden_tag() }}
                         {{ contracted_form.virus(class_="form-control virus-field") }}
-                        <button type="button" class="virus-button" id="addNewField">+</button> 
-                    </div>
-                {% endfor %}
+                        {{ contracted_form.contract_date(class_="form-control virus-field") }}
+                    {% endfor %}
+                    <button type="button" class="virus-button" id="addNewField">+</button> 
+                </div>
 
                 {{ wtf.form_field(form.submit) }}
+                {% if form.errors %}
+                    {{ form.errors }}
+                {% endif %}
             </form>
         </div>
     </div>
@@ -38,9 +42,13 @@
 
     <script>
     $(document).ready(function() {
+        var fieldNum=2;
         $("#addNewField").click(function() {
-            var newInput = $("#viruses-1-virus").clone()
+            var newInput = $("#viruses-1-virus").clone().attr("name", "viruses-" + fieldNum + "-virus")
             $(".virus-form").append(newInput);
+            var newInput = $("#viruses-1-contract_date").clone().attr("name", "viruses-" + fieldNum + "-contract_date")
+            $(".virus-form").append(newInput);
+            fieldNum++;
         });
     });
     </script>

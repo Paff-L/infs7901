@@ -1,13 +1,14 @@
 from app import cursor
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SelectField, SubmitField, DateField, FormField, FieldList
-from wtforms.validators import DataRequired, Length, NumberRange
+from wtforms.validators import DataRequired, Optional, Length, NumberRange
 
 class ContractedVirusForm(FlaskForm):
     query = "SELECT Name FROM Virus"
     cursor.execute(query)
     records = [entry[0] for entry in cursor.fetchall()]
-    virus = SelectField('Contracted Virus', choices=[(1, records[0]), (2, records[1]), (3, records[2]), (4, records[3])])
+    virus = SelectField('Contracted Virus', choices=[('1', records[0]), ('2', records[1]), ('3', records[2]), ('4', records[3])])
+    contract_date = DateField('Contract Date', format='%Y-%m-%d', validators=[Optional()])
 
 class PatientMixin():
     first_name = StringField('First Name', validators=[DataRequired(), Length(max=32)])
