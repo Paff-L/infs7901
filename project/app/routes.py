@@ -39,6 +39,21 @@ def add_patient():
         data_list = [entry.data for entry in form]
         cursor.execute(query, data_list[:8])
         db.commit()
+
+        query = f"SELECT PatientID FROM Patient WHERE FirstName = '{form.first_name.data}' AND LastName = '{form.last_name.data}' AND DOB = '{form.date_of_birth.data}'"
+        cursor.execute(query)
+        records = cursor.fetchall()
+        patient_id = records[0][0]
+        
+        for entry in form.viruses.data:
+            virus_id = int(entry.get('virus'))
+            contract_date = entry.get('contract_date')
+            query = f"INSERT INTO `Contracted` (`PatientID`, `VirusID`, `ContractDate`) VALUES \
+                    (%s, %s, %s)"
+            data_list = [patient_id, virus_id, contract_date]
+            cursor.execute(query, data_list)
+            db.commit()
+
         return redirect(url_for('index'))
     return render_template('add_patient.html', title='Add Patient', form=form)
 

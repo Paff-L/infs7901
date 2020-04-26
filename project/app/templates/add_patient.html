@@ -5,7 +5,53 @@
     <h1>Add Patient</h1>
     <div class="row">
         <div class="col-md-4">
-            {{ wtf.quick_form(form) }}
+            <form class="form" action="" method="post" role="form">
+                {{ form.hidden_tag() }}
+                {{ wtf.form_errors(form, hiddens="only") }}
+
+                {{ wtf.form_field(form.first_name) }}
+                {{ wtf.form_field(form.last_name) }}
+                {{ wtf.form_field(form.gender) }}
+                {{ wtf.form_field(form.nationality) }}
+                {{ wtf.form_field(form.state) }}
+                {{ wtf.form_field(form.postcode) }}
+                {{ wtf.form_field(form.date_of_birth) }}
+                {{ wtf.form_field(form.phone_number) }}
+
+                <div class="form-group virus-form">
+                    {{ form.viruses.label(class_="control-label, virus-label") }}
+                    {% for contracted_form in form.viruses %}
+                        {{ contracted_form.hidden_tag() }}
+                        {{ contracted_form.virus(class_="form-control virus-field") }}
+                        {{ contracted_form.contract_date(class_="form-control virus-field") }}
+                        <button type="button" class="virus-cured-button">X</button> 
+                    {% endfor %}
+                </div>
+                <button type="button" class="virus-add-button" id="addNewField">Add Virus</button> 
+
+                {{ wtf.form_field(form.submit) }}
+                {% if form.errors %}
+                    {{ form.errors }}
+                {% endif %}
+            </form>
         </div>
     </div>
+{% endblock %}
+
+{% block scripts %}
+    {{super()}}
+
+    <script>
+    $(document).ready(function() {
+        var fieldNum = {{ form.viruses|length }}+1;
+        $("#addNewField").click(function() {
+            var newInput = $("#viruses-0-virus").clone().attr("name", "viruses-" + fieldNum + "-virus")
+            $(".virus-form").append(newInput);
+            $(".virus-form").append("&nbsp;")
+            var newInput = $("#viruses-0-contract_date").clone().attr("name", "viruses-" + fieldNum + "-contract_date")
+            $(".virus-form").append(newInput);
+            fieldNum++;
+        });
+    });
+    </script>
 {% endblock %}

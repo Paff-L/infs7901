@@ -3,11 +3,19 @@
 }
 
 .virus-field {
-    width: 40%;
+    width: 44.5%;
     display: inline;
 }
 
-.virus-button {
+.virus-form {
+    margin-bottom: 2px;
+}
+
+.virus-cured-button {
     display: inline;
-    margin-left: 2px;
+}
+
+.virus-add-button {
+    display: block;
+    margin-bottom: 10px;
 }

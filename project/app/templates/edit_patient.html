@@ -24,9 +24,10 @@
                         {{ contracted_form.hidden_tag() }}
                         {{ contracted_form.virus(class_="form-control virus-field") }}
                         {{ contracted_form.contract_date(class_="form-control virus-field") }}
+                        <button type="button" class="virus-cured-button">X</button> 
                     {% endfor %}
-                    <button type="button" class="virus-button" id="addNewField">+</button> 
                 </div>
+                <button type="button" class="virus-add-button" id="addNewField">Add Virus</button> 
 
                 {{ wtf.form_field(form.submit) }}
                 {% if form.errors %}
@@ -42,10 +43,11 @@
 
     <script>
     $(document).ready(function() {
-        var fieldNum=2;
+        var fieldNum = {{ form.viruses|length }}+1;
         $("#addNewField").click(function() {
             var newInput = $("#viruses-1-virus").clone().attr("name", "viruses-" + fieldNum + "-virus")
             $(".virus-form").append(newInput);
+            $(".virus-form").append("&nbsp;")
             var newInput = $("#viruses-1-contract_date").clone().attr("name", "viruses-" + fieldNum + "-contract_date")
             $(".virus-form").append(newInput);
             fieldNum++;
