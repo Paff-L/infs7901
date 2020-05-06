@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Apr 12, 2020 at 04:50 AM
+-- Generation Time: May 06, 2020 at 06:13 AM
 -- Server version: 5.7.28-0ubuntu0.18.04.4
 -- PHP Version: 7.2.24-0ubuntu0.18.04.2
 
@@ -253,6 +253,7 @@ INSERT INTO `Virus` (`VirusID`, `Name`, `LastOutbreak`, `Symptoms`) VALUES
 --
 
 CREATE TABLE `Visited` (
+  `VisitID` int(11) NOT NULL,
   `PatientID` int(11) NOT NULL,
   `TransportID` int(11) DEFAULT NULL,
   `AreaID` int(11) NOT NULL,
@@ -264,21 +265,19 @@ CREATE TABLE `Visited` (
 -- Dumping data for table `Visited`
 --
 
-INSERT INTO `Visited` (`PatientID`, `TransportID`, `AreaID`, `StartTime`, `EndTime`) VALUES
-(1, 5, 4, '2020-03-01 08:00:00', '2020-03-01 12:00:00'),
-(1, 6, 4, '2020-03-01 08:00:00', '2020-03-01 12:00:00'),
-(2, 7, 10, '2020-03-14 15:30:00', '2020-03-14 21:00:00'),
-(5, 7, 10, '2020-03-14 16:00:00', '2020-03-14 22:30:00'),
-(6, NULL, 2, '2020-01-21 09:00:00', '2020-01-21 18:00:00'),
-(1, 5, 4, '2020-03-01 08:00:00', '2020-03-01 12:00:00'),
-(1, 6, 4, '2020-03-01 08:00:00', '2020-03-01 12:00:00'),
-(2, 7, 10, '2020-03-14 15:30:00', '2020-03-14 21:00:00'),
-(5, 7, 10, '2020-03-14 16:00:00', '2020-03-14 22:30:00'),
-(6, NULL, 2, '2020-01-21 09:00:00', '2020-01-21 18:00:00'),
-(6, NULL, 4, NULL, NULL),
-(7, 2, 11, '2020-02-28 13:25:00', '2020-02-28 19:30:00'),
-(9, 3, 8, NULL, NULL),
-(10, 8, 3, '2020-03-19 18:00:00', '2020-03-19 22:45:00');
+INSERT INTO `Visited` (`VisitID`, `PatientID`, `TransportID`, `AreaID`, `StartTime`, `EndTime`) VALUES
+(1, 1, 5, 4, '2020-03-01 08:00:00', '2020-03-01 12:00:00'),
+(2, 1, 6, 4, '2020-03-01 08:00:00', '2020-03-01 12:00:00'),
+(3, 2, 7, 10, '2020-03-14 15:30:00', '2020-03-14 21:00:00'),
+(4, 5, 7, 10, '2020-03-14 16:00:00', '2020-03-14 22:30:00'),
+(5, 6, NULL, 2, '2020-01-21 09:00:00', '2020-01-21 18:00:00'),
+(8, 2, 7, 10, '2020-03-14 15:30:00', '2020-03-14 21:00:00'),
+(9, 5, 7, 10, '2020-03-14 16:00:00', '2020-03-14 22:30:00'),
+(10, 6, NULL, 2, '2020-01-21 09:00:00', '2020-01-21 18:00:00'),
+(11, 6, NULL, 4, NULL, NULL),
+(12, 7, 2, 11, '2020-02-28 13:25:00', '2020-02-28 19:30:00'),
+(13, 9, 3, 8, NULL, NULL),
+(14, 10, 8, 3, '2020-03-19 18:00:00', '2020-03-19 22:45:00');
 
 --
 -- Indexes for dumped tables
@@ -338,6 +337,7 @@ ALTER TABLE `Virus`
 -- Indexes for table `Visited`
 --
 ALTER TABLE `Visited`
+  ADD PRIMARY KEY (`VisitID`),
   ADD KEY `PatientID` (`PatientID`),
   ADD KEY `TransportID` (`TransportID`),
   ADD KEY `AreaID` (`AreaID`);
@@ -371,6 +371,11 @@ ALTER TABLE `Transport`
 --
 ALTER TABLE `Virus`
   MODIFY `VirusID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+--
+-- AUTO_INCREMENT for table `Visited`
+--
+ALTER TABLE `Visited`
+  MODIFY `VisitID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 --
 -- Constraints for dumped tables
 --

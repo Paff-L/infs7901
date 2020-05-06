@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h2>Information on {{ name }}'s visit to {{ location }} on {{ start_date }}</h2>
+    {% if transports %}
+        <table class="table">
+            <tr>
+                <th>Type of Transport</th>
+                <th>Starting Location</th>
+                <th>End Location</th>
+            </tr>
+            {% for transport in transports %}
+            <tr>
+                <td>{{ transport[0] }}</td>
+                <td>{{ transport[1] }}</td>
+                <td>{{ transport[2] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>The transport method is unknown.</p>
+    {% endif %}
+{% endblock %}
+

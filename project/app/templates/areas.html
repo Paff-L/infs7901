@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <h1>Locations and Events</h1>
+    {% for location in locations %}
+        <h3>{{ location[0] }} (Average Visitors: {{ location[1] }})</h3>
+        <ul>
+        {% for instance in location[2] %}
+            {% if instance[2] is not none %}
+                <li><a href="{{ url_for('visit', patient_id=instance[4], area_id=instance[5], start_time=instance[2]) }}">{{ instance[0] }} {{ instance[1] }} visited between {{ instance[2] }} and {{ instance[3] }}.</a></li>
+            {% else %}
+                <li>{{ instance[0] }} {{ instance[1] }} visited at an unknown date.</li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    {% endfor %}
+
+    {% for event in events %}
+        <h3>{{ event[0] }} (Total Visitors: {{ event[1] }})</h3>
+        <ul>
+        {% for instance in event[2] %}
+            {% if instance[2] is not none %}
+                <li><a href="{{ url_for('visit', patient_id=instance[4], area_id=instance[5], start_time=instance[2]) }}">{{ instance[0] }} {{ instance[1] }} visited between {{ instance[2] }} and {{ instance[3] }}.</a></li>
+            {% else %}
+                <li>{{ instance[0] }} {{ instance[1] }} visited at an unknown date.</li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    {% endfor %}
+            
+{% endblock %}

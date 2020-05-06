@@ -6,9 +6,6 @@ from app.models import Patient
 @app.route('/')
 @app.route('/index')
 def index():
-    query = "SELECT * FROM Patient"
-    cursor.execute(query)
-    records = cursor.fetchall()
     return render_template('index.html', title='Home')
 
 @app.route('/patient/<patient_id>')
@@ -119,7 +116,6 @@ def virus(virus_id):
     query = f"SELECT * FROM Virus WHERE VirusID = {virus_id}"
     cursor.execute(query)
     virus_info = cursor.fetchall()[0]
-    print(virus_info)
     return render_template('virus.html', title=f'{virus_info[1]}', virus=virus_info)
 
 @app.route('/viruses')
@@ -129,3 +125,67 @@ def viruses():
     records = cursor.fetchall()
     return render_template('viruses.html', title='Viruses', viruses=records)
 
+@app.route('/areas')
+def areas():
+    locations = []
+    query = "SELECT L.Name, L.AvgVisitors, P.FirstName, P.LastName, V.StartTime, V.EndTime, P.PatientID, V.AreaID \
+            FROM Location L, Patient P, Visited V \
+            WHERE V.PatientID = P.PatientID AND V.AreaID = L.AreaID"
+    cursor.execute(query)
+    records = cursor.fetchall()
+    used = set()
+    for record in [x for x in records if x not in used and (used.add(x) or True)]:
+        if record[0] in [location[0] for location in locations]:
+            locations[-1][-1].append(record[2:])
+        else:
+            locations.append([record[0], record[1], [record[2:]]])
+
+    events = []
+    query = "SELECT E.Name, E.TotalVisitors, P.FirstName, P.LastName, V.StartTime, V.EndTime, P.PatientID, V.AreaID \
+            FROM Event E, Patient P, Visited V \
+            WHERE V.PatientID = P.PatientID AND V.AreaID = E.AreaID"
+    cursor.execute(query)
+    records = cursor.fetchall()
+    used = set()
+    for record in [x for x in records if x not in used and (used.add(x) or True)]:
+        if record[0] in [event[0] for event in events]:
+            events[-1][-1].append(record[2:])
+        else:
+            events.append([record[0], record[1], [record[2:]]])
+    return render_template('areas.html', title='Areas', locations=locations, events=events)
+
+@app.route('/visit/patient_id=<patient_id>+area_id=<area_id>+start_time=<start_time>')
+def visit(patient_id, area_id, start_time):
+    query = f"SELECT P.FirstName, V.VisitID \
+            FROM Patient P, Visited V \
+            WHERE V.PatientID = {patient_id} \
+            AND V.PatientID = P.PatientID \
+            AND V.AreaID = {area_id} \
+            AND V.StartTime = '{start_time}'"
+    cursor.execute(query)
+    records = cursor.fetchall()
+    visited_ids = [id[1] for id in records]
+    patient_name = records[0][0]
+    
+    transports=[]
+    for visit_id in visited_ids:
+        query = f"SELECT T.TransportType, T.StartLocation, T.EndLocation \
+                FROM Patient P, Transport T, Visited V \
+                WHERE V.VisitID = {visit_id} \
+                AND P.PatientID = V.PatientID \
+                AND T.TransportID = V.TransportID"
+        cursor.execute(query)
+        records = cursor.fetchall()
+        if records:
+            transports.append(records[0])
+    transports = list(set(transports))
+    
+    query = f"(SELECT Name FROM Location WHERE AreaID = {area_id}) \
+            UNION \
+            (SELECT Name FROM Event WHERE AreaID = {area_id})"
+    cursor.execute(query)
+    location_name = cursor.fetchall()[0][0]
+    
+    return render_template('visit.html', title=f"{patient_name}'s visit to {location_name}", name=patient_name, location=location_name, start_date=start_time, transports=transports)
+    
+    
