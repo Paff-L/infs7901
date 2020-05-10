@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for
 from app import app, cursor, db
-from app.forms import PatientAdd, PatientEdit, ContractedVirusForm
+from app.forms import PatientAdd, PatientEdit, ContractedVirusForm, VisitedAreaAdd
 from app.models import Patient 
 
 @app.route('/')
@@ -17,7 +17,24 @@ def patient(patient_id):
     query = f"SELECT V.VirusID, V.Name FROM Contracted C, Virus V WHERE C.VirusID = V.VirusID AND C.PatientID = {patient_id}"
     cursor.execute(query)
     contracted_viruses = cursor.fetchall()
-    return render_template('patient.html', title=f'Patient Number: {patient_id}', patient=patient_info[0], viruses=contracted_viruses)
+    
+    query = f"SELECT AreaID, StartTime FROM Visited WHERE PatientID = {patient_id}"
+    cursor.execute(query)
+    visited_areas = cursor.fetchall()
+    
+    location_names = []
+    for area_id in [area[0] for area in visited_areas]:
+        query = f"(SELECT Name FROM Location WHERE AreaID = {area_id}) \
+                UNION \
+                (SELECT Name FROM Event WHERE AreaID = {area_id})"
+        cursor.execute(query)        
+        location_names.append(cursor.fetchall()[0][0])
+    
+    for i, name in enumerate(location_names):
+        visited_areas[i] = visited_areas[i] + (name,)
+    visited_areas = list(set(visited_areas))
+    
+    return render_template('patient.html', title=f'Patient Number: {patient_id}', patient=patient_info[0], viruses=contracted_viruses, visits=visited_areas)
 
 @app.route('/patients')
 def patients():
@@ -51,7 +68,7 @@ def add_patient():
             cursor.execute(query, data_list)
             db.commit()
 
-        return redirect(url_for('index'))
+        return redirect(url_for('patients'))
     return render_template('add_patient.html', title='Add Patient', form=form)
 
 @app.route('/patient/<patient_id>/edit', methods=['GET', 'POST'])
@@ -188,4 +205,90 @@ def visit(patient_id, area_id, start_time):
     
     return render_template('visit.html', title=f"{patient_name}'s visit to {location_name}", name=patient_name, location=location_name, start_date=start_time, transports=transports)
     
+@app.route('/patient/<patient_id>/add_visit', methods=['GET', 'POST'])
+def add_visit(patient_id):
+    form = VisitedAreaAdd()
+    query = f"SELECT FirstName FROM Patient WHERE PatientID = {patient_id}"
+    cursor.execute(query)
+    patient_name = cursor.fetchall()[0][0]
+    
+    if form.validate_on_submit():
+        flash(f"{patient_name}'s visit to {form.area_name.data} successfully recorded.")
+        
+        # Find if existing location/event exists
+        if form.area_type.data == 'location':
+            query = f"SELECT AreaID FROM Location WHERE Name = '{form.area_name.data}'"
+            cursor.execute(query)
+            location_match = cursor.fetchall()
+            
+            # If the location does not exist
+            if not location_match:
+                query = f"INSERT INTO `Area` (`Latitude`, `Longitude`) VALUES \
+                        (%s, %s)"
+                data_list = [form.area_lat.data, form.area_lon.data]
+                cursor.execute(query, data_list)
+                db.commit()
+                area_id = cursor.lastrowid
+                
+                query = f"INSERT INTO `Location` (`AreaID`, `Name`, `AvgVisitors`) VALUES \
+                        (%s, %s, %s)"
+                data_list = [area_id, form.area_name.data, form.area_visitors.data]
+                cursor.execute(query, data_list)
+                db.commit()
+            else:
+                area_id = location_match[0][0]
+        else:
+            query = f"SELECT AreaID FROM Event WHERE Name = '{form.area_name.data}'"
+            cursor.execute(query)
+            event_match = cursor.fetchall()
+            
+            # If the event does not exist
+            if not event_match:
+                query = f"INSERT INTO `Area` (`Latitude`, `Longitude`) VALUES \
+                        (%s, %s)"
+                data_list = [form.area_lat.data, form.area_lon.data]
+                cursor.execute(query, data_list)
+                db.commit()
+                area_id = cursor.lastrowid
+                
+                query = f"INSERT INTO `Event` (`AreaID`, `Name`, `TotalVisitors`) VALUES \
+                        (%s, %s, %s)"
+                data_list = [area_id, form.area_name.data, form.area_visitors.data]
+                cursor.execute(query, data_list)
+                db.commit()
+            else:
+                area_id = event_match[0][0]
+            
+                
+        # Parse transport data
+        transports = form.transports.data
+        if len(transports) == 1 and transports[0].get('start_location') == 'None' and transports[0].get('end_location') == 'None':
+            transport_id = None
+        else:
+            for transport in transports:
+                query = f'''SELECT TransportID FROM Transport \
+                        WHERE TransportType = "{transport.get('transport_type')}" \
+                        AND StartLocation = "{transport.get('start_location')}" \
+                        AND EndLocation = "{transport.get('end_location')}"'''
+                cursor.execute(query)
+                transport_match = cursor.fetchall()
+                if transport_match:
+                    transport_id = transport_match[0][0]
+                else:
+                    query = f"INSERT INTO `Transport` (`TransportType`, `StartLocation`, `EndLocation`) VALUES \
+                            (%s, %s, %s)"
+                    data_list = [transport.get('transport_type'), transport.get('start_location'), transport.get('end_location')]
+                    cursor.execute(query, data_list)
+                    db.commit()
+                    transport_id = cursor.lastrowid
+        
+        # Add data to visited table
+        query = f"INSERT INTO `Visited` (`PatientID`, `TransportID`, `AreaID`, `StartTime`, `EndTime`) VALUES \
+                (%s, %s, %s, %s, %s)"
+        data_list = [patient_id, transport_id, area_id, form.visit_start_time.data, form.visit_end_time.data]
+        cursor.execute(query, data_list)
+        db.commit()
+        
+        return redirect(url_for('patient', patient_id=patient_id))
+    return render_template('add_visit.html', title='Add Visit', form=form)
     

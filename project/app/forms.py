@@ -1,7 +1,29 @@
 from app import cursor
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, SelectField, SubmitField, DateField, FormField, FieldList
+from wtforms import StringField, IntegerField, DecimalField, SelectField, SubmitField, DateField, FormField, RadioField, DateTimeField, FieldList
 from wtforms.validators import DataRequired, Optional, Length, NumberRange
+
+class TransportForm(FlaskForm):
+    transport_type = SelectField('Transport Type', validators=[DataRequired()], choices=[('Airplane', 'Airplane'), ('Bus', 'Bus'), ('Train','Train'), ('Taxi','Taxi/Uber'), ('Ship','Ship'), ('Tram','Tram')])
+    start_location = StringField('Starting Location', validators=[DataRequired(), Length(max=64)])
+    end_location = StringField('End Location', validators=[DataRequired(), Length(max=64)])
+
+class VisitedAreaMixin():
+    area_type = RadioField('Area Type', validators=[DataRequired()], choices=[('event', 'Event'), ('location', 'Location')])
+    area_lat = DecimalField('Area Latitude', validators=[Optional()], places=8)
+    area_lon = DecimalField('Area Longitude', validators=[Optional()], places=8)
+    area_name = StringField('Area Name', validators=[DataRequired(), Length(max=64)])
+    area_visitors = IntegerField('Approximate Number of People at the Area')
+    
+    visit_start_time = DateTimeField('Start Time of the Visit')
+    visit_end_time = DateTimeField('End Time of the Visit')
+    transports = FieldList(FormField(TransportForm), min_entries=1)
+
+class VisitedAreaAdd(FlaskForm, VisitedAreaMixin):
+    submit = SubmitField('Add Visit')
+
+class VisitedAreaEdit(FlaskForm, VisitedAreaMixin):
+    submit = SubmitField('Edit Visit')
 
 class ContractedVirusForm(FlaskForm):
     query = "SELECT Name FROM Virus"

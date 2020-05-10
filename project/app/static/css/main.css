@@ -7,8 +7,16 @@
     display: inline;
 }
 
+.transport-field {
+    display: inline;
+}
+
 .virus-form {
     margin-bottom: 2px;
+}
+
+.transport-form {
+    display: none;
 }
 
 .virus-cured-button {

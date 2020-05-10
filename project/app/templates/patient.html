@@ -19,4 +19,12 @@
         {% endfor %}
     </ul>
     <p><a href="{{ url_for('edit_patient', patient_id=patient[0]) }}">Edit Patient Information</a></p>
+    
+    <h3>The Patient has recently visited the following areas:</h3>
+    <ul>
+        {% for visit in visits %}
+            <li><a href="{{ url_for('visit', patient_id=patient[0], area_id=visit[0], start_time=visit[1]) }}">{{ visit[2] }} at {{ visit[1] }}</a></li>
+        {% endfor %}
+    </ul>
+    <p><a href="{{ url_for('add_visit', patient_id=patient[0]) }}">Add Visits</a></p>
 {% endblock %}

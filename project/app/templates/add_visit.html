@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <h1>Add a Visit</h1>
+    <div class="row">
+        <div class="col-md-6">
+            <form class="form" action="" method="post" role="form">
+                {{ form.hidden_tag() }}
+                {{ wtf.form_errors(form, hiddens="only") }}
+
+                {{ wtf.form_field(form.area_type) }}
+                {{ wtf.form_field(form.area_lat) }}
+                {{ wtf.form_field(form.area_lon) }}
+                {{ wtf.form_field(form.area_name) }}
+                {{ wtf.form_field(form.area_visitors) }}
+                {{ wtf.form_field(form.visit_start_time) }}
+                {{ wtf.form_field(form.visit_end_time) }}
+                
+                <div class="form-group transport-form">
+                    {{ form.transports.label(class_="control-label, virus-label") }}
+                    <table class="table table-bordered transport-table">
+                        <tr>
+                            <th>Type of Transport</th>
+                            <th>Starting Location</th>
+                            <th>End Location</th>
+                        </tr>
+                        {% for transport_form in form.transports %}
+                        <tr>
+                            {{ transport_form.hidden_tag() }}
+                            <td>{{ transport_form.transport_type(class_="form-control transport-field") }}</td>
+                            <td>{{ transport_form.start_location(class_="form-control transport-field", value="None") }}</td>
+                            <td>{{ transport_form.end_location(class_="form-control transport-field", value="None") }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                <button type="button" class="virus-add-button" id="addNewField">Add Transport</button> 
+                {{ wtf.form_field(form.submit) }}
+                {% if form.errors %}
+                    {{ form.errors }}
+                {% endif %}
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{super()}}
+
+    <script>
+    $(document).ready(function() {
+        var fieldNum = {{ form.transports|length }};
+        $("#addNewField").click(function() {
+            if ($('.transport-form').css('display') == 'none'){
+                $('.transport-form').css('display', 'block');
+                $('.transport-field').attr('value', '');
+            }
+            else {
+                var transport_type = $("#transports-0-transport_type").clone().attr("name", "transports-" + fieldNum + "-transport_type")
+                var start_location = $("#transports-0-start_location").clone().find("input:text").val("").end().attr("name", "transports-" + fieldNum + "-start_location")
+                var end_location = $("#transports-0-end_location").clone().find("input:text").val("").end().attr("name", "transports-" + fieldNum + "-end_location")
+                $(".transport-table").append($('<tr>')
+                    .append($('<td>')
+                        .append($(transport_type))
+                    )
+                    .append($('<td>')
+                        .append($(start_location))
+                    )
+                    .append($('<td>')
+                        .append($(end_location))
+                    )
+                );
+                fieldNum++;
+            }
+        });
+    });
+    </script>
+{% endblock %}
