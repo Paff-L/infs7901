@@ -3,7 +3,6 @@
 }
 
 .virus-field {
-    width: 44.5%;
     display: inline;
 }
 
@@ -20,10 +19,21 @@
 }
 
 .virus-cured-button {
-    display: inline;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .virus-add-button {
     display: block;
     margin-bottom: 10px;
+}
+
+.patient-info {
+    list-style: none;
+    padding-left: 20px;
+}
+
+.form-control {
+    padding: 0px 12px;
 }

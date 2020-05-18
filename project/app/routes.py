@@ -1,3 +1,4 @@
+from datetime import date
 from flask import render_template, flash, redirect, url_for
 from app import app, cursor, db
 from app.forms import PatientAdd, PatientEdit, ContractedVirusForm, VisitedAreaAdd
@@ -13,6 +14,10 @@ def patient(patient_id):
     query = f"SELECT * FROM Patient WHERE PatientID = {patient_id}"
     cursor.execute(query)
     patient_info = cursor.fetchall()
+    
+    query = f"SELECT * FROM HighRiskContact WHERE PatientID = {patient_id}"
+    cursor.execute(query)
+    high_risk_contacts = cursor.fetchall()
     
     query = f"SELECT V.VirusID, V.Name FROM Contracted C, Virus V WHERE C.VirusID = V.VirusID AND C.PatientID = {patient_id}"
     cursor.execute(query)
@@ -34,13 +39,18 @@ def patient(patient_id):
         visited_areas[i] = visited_areas[i] + (name,)
     visited_areas = list(set(visited_areas))
     
-    return render_template('patient.html', title=f'Patient Number: {patient_id}', patient=patient_info[0], viruses=contracted_viruses, visits=visited_areas)
+    return render_template('patient.html', title=f'Patient Number: {patient_id}', patient=patient_info[0], contacts=high_risk_contacts, viruses=contracted_viruses, visits=visited_areas)
 
 @app.route('/patients')
 def patients():
     query = "SELECT * FROM Patient"
     cursor.execute(query)
     records = cursor.fetchall()
+    for i, record in enumerate(records):
+        dob = record[7]
+        today = date.today()
+        age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+        records[i] = record + (age,)
     return render_template('patients.html', title='Patients', patients=records)
 
 @app.route('/add_patient', methods=['GET', 'POST'])
@@ -120,11 +130,17 @@ def edit_patient(patient_id):
                 db.commit()
             else:
                 if contract_date != [entry[1] for entry in contracted_viruses if entry[0] == virus_id][0]:
-                    query = f"Update `Contracted` SET `ContractDate` = '{contract_date}' \
+                    query = f"UPDATE `Contracted` SET `ContractDate` = '{contract_date}' \
                             WHERE PatientID = {patient_id} AND VirusID = {virus_id}"
                     cursor.execute(query)
                     db.commit()
-                
+        
+        # Delete entries that has been marked as cured 
+        for entry in contracted_viruses:
+            if str(entry[0]) not in [form_data.get('virus') for form_data in form.viruses.data]:
+                query = f"DELETE FROM `Contracted` WHERE PatientID = '{patient_id}' AND VirusID = '{entry[0]}'"
+                cursor.execute(query)
+                db.commit()
         return redirect(url_for('patient', patient_id=patient_id))
     return render_template('edit_patient.html', title='Edit Patient Information', form=form)
 
@@ -264,6 +280,12 @@ def add_visit(patient_id):
         transports = form.transports.data
         if len(transports) == 1 and transports[0].get('start_location') == 'None' and transports[0].get('end_location') == 'None':
             transport_id = None
+            # Add data to visited table
+            query = f"INSERT INTO `Visited` (`PatientID`, `TransportID`, `AreaID`, `StartTime`, `EndTime`) VALUES \
+                    (%s, %s, %s, %s, %s)"
+            data_list = [patient_id, transport_id, area_id, form.visit_start_time.data, form.visit_end_time.data]
+            cursor.execute(query, data_list)
+            db.commit()
         else:
             for transport in transports:
                 query = f'''SELECT TransportID FROM Transport \
@@ -282,12 +304,12 @@ def add_visit(patient_id):
                     db.commit()
                     transport_id = cursor.lastrowid
         
-        # Add data to visited table
-        query = f"INSERT INTO `Visited` (`PatientID`, `TransportID`, `AreaID`, `StartTime`, `EndTime`) VALUES \
-                (%s, %s, %s, %s, %s)"
-        data_list = [patient_id, transport_id, area_id, form.visit_start_time.data, form.visit_end_time.data]
-        cursor.execute(query, data_list)
-        db.commit()
+                # Add data to visited table
+                query = f"INSERT INTO `Visited` (`PatientID`, `TransportID`, `AreaID`, `StartTime`, `EndTime`) VALUES \
+                        (%s, %s, %s, %s, %s)"
+                data_list = [patient_id, transport_id, area_id, form.visit_start_time.data, form.visit_end_time.data]
+                cursor.execute(query, data_list)
+                db.commit()
         
         return redirect(url_for('patient', patient_id=patient_id))
     return render_template('add_visit.html', title='Add Visit', form=form)

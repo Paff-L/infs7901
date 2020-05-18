@@ -2,15 +2,19 @@
 
 {% block app_content %}
     <h1>Stored Patients so far</h1>
-    {% for patient in patients %}
-        <ul>
-            <h3><a href="{{ url_for('patient', patient_id=patient[0]) }}">{{ patient[1] }} {{ patient[2] }}</a></h3>
-            <li>{{ patient[3] }}</li>
-            <li>{{ patient[4] }}</li>
-            <li>{{ patient[5] }}</li>
-            <li>{{ patient[6] }}</li>
-            <li>{{ patient[7] }}</li>
-            <li>{{ patient[8] }}</li>
-        </ul>
-    {% endfor %}
+    <table class="table table-bordered virus-table">
+        <tr>
+            <th>Patient Name</th>
+            <th>State</th>
+            <th>Age</th>
+        </tr>
+        {% for patient in patients %}
+        <tr>
+            <td><a href="{{ url_for('patient', patient_id=patient[0]) }}">{{ patient[1] }} {{ patient[2] }}</a></td>
+            <td>{{ patient[5] }}</td>
+            <td>{{ patient[9] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 {% endblock %}
+

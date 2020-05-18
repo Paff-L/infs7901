@@ -4,7 +4,7 @@
 {% block app_content %}
     <h1>Edit Patient</h1>
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-6">
             <form class="form" action="" method="post" role="form">
                 {{ form.hidden_tag() }}
                 {{ wtf.form_errors(form, hiddens="only") }}
@@ -20,15 +20,23 @@
 
                 <div class="form-group virus-form">
                     {{ form.viruses.label(class_="control-label, virus-label") }}
-                    {% for contracted_form in form.viruses %}
-                        {{ contracted_form.hidden_tag() }}
-                        {{ contracted_form.virus(class_="form-control virus-field") }}
-                        {{ contracted_form.contract_date(class_="form-control virus-field") }}
-                        <button type="button" class="virus-cured-button">X</button> 
-                    {% endfor %}
+                    <table class="table table-bordered virus-table">
+                        <tr>
+                            <th>Virus Name</th>
+                            <th>Date of Contraction</th>
+                            <th>Mark as Cured</th>
+                        </tr>
+                        {% for contracted_form in form.viruses %}
+                        <tr>
+                            {{ contracted_form.hidden_tag() }}
+                            <td>{{ contracted_form.virus(class_="form-control virus-field") }}</td>
+                            <td>{{ contracted_form.contract_date(class_="form-control virus-field") }}</td>
+                            <td><button type="button" class="virus-cured-button">X</button></td>
+                        </tr>
+                        {% endfor %}
+                    </table>
                 </div>
                 <button type="button" class="virus-add-button" id="addNewField">Add Virus</button> 
-
                 {{ wtf.form_field(form.submit) }}
                 {% if form.errors %}
                     {{ form.errors }}
@@ -45,12 +53,24 @@
     $(document).ready(function() {
         var fieldNum = {{ form.viruses|length }}+1;
         $("#addNewField").click(function() {
-            var newInput = $("#viruses-1-virus").clone().attr("name", "viruses-" + fieldNum + "-virus")
-            $(".virus-form").append(newInput);
-            $(".virus-form").append("&nbsp;")
-            var newInput = $("#viruses-1-contract_date").clone().attr("name", "viruses-" + fieldNum + "-contract_date")
-            $(".virus-form").append(newInput);
+            var virus_name = $("#viruses-1-virus").clone().attr("name", "viruses-" + fieldNum + "-virus")
+            var contract_date = $("#viruses-1-contract_date").clone().attr("name", "viruses-" + fieldNum + "-contract_date")
+            var cured_button = $(".virus_cured_button").clone()
+            $(".virus-table").append($('<tr>')
+                .append($('<td>')
+                    .append($(virus_name))
+                )
+                .append($('<td>')
+                    .append($(contract_date))
+                )
+                .append($('<td>')
+                    .append($(cured_button))
+                )
+            );
             fieldNum++;
+        });
+        $(".virus-cured-button").click(function() {
+            $(this).closest('tr').remove();
         });
     });
     </script>

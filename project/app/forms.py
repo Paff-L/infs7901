@@ -1,6 +1,7 @@
 from app import cursor
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, DecimalField, SelectField, SubmitField, DateField, FormField, RadioField, DateTimeField, FieldList
+from wtforms import StringField, IntegerField, DecimalField, SelectField, SubmitField, FormField, RadioField, FieldList, DateTimeField
+from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Optional, Length, NumberRange
 
 class TransportForm(FlaskForm):
@@ -15,8 +16,8 @@ class VisitedAreaMixin():
     area_name = StringField('Area Name', validators=[DataRequired(), Length(max=64)])
     area_visitors = IntegerField('Approximate Number of People at the Area')
     
-    visit_start_time = DateTimeField('Start Time of the Visit')
-    visit_end_time = DateTimeField('End Time of the Visit')
+    visit_start_time = DateTimeField('Start Time of the Visit (yyyy-mm-dd HH:MM:SS)')
+    visit_end_time = DateTimeField('End Time of the Visit (yyyy-mm-dd HH:MM:SS)')
     transports = FieldList(FormField(TransportForm), min_entries=1)
 
 class VisitedAreaAdd(FlaskForm, VisitedAreaMixin):
